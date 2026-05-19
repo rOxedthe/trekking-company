@@ -541,15 +541,51 @@
       display: grid;
       gap: 34px;
       counter-reset: step;
+      perspective: 1000px;
     }
 
     .step {
+      --step-tilt-x: 0deg;
+      --step-tilt-y: 0deg;
       display: grid;
       grid-template-columns: 92px 1fr;
       gap: 22px;
       align-items: start;
-      padding-bottom: 28px;
+      padding: 22px 20px 28px;
       border-bottom: 1px solid var(--line);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      transform: perspective(800px) rotateX(var(--step-tilt-x)) rotateY(var(--step-tilt-y)) translateY(0);
+      transform-style: preserve-3d;
+      transition: transform 0.24s ease, border-color 0.24s ease, background 0.24s ease, box-shadow 0.24s ease;
+      will-change: transform;
+    }
+
+    .step::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 18px;
+      bottom: 18px;
+      width: 3px;
+      background: var(--gold);
+      transform: scaleY(0);
+      transform-origin: bottom;
+      transition: transform 0.28s ease;
+    }
+
+    .step:hover,
+    .step.step-tilting {
+      background: rgba(199,155,53,0.06);
+      border-bottom-color: rgba(199,155,53,0.44);
+      box-shadow: 0 22px 54px rgba(23,32,50,0.09);
+      transform: perspective(800px) rotateX(var(--step-tilt-x)) rotateY(var(--step-tilt-y)) translateY(-6px);
+    }
+
+    .step:hover::after,
+    .step.step-tilting::after {
+      transform: scaleY(1);
     }
 
     .step::before {
@@ -559,6 +595,33 @@
       font-family: "Playfair Display", serif;
       font-size: 78px;
       line-height: 0.8;
+      transform: translateZ(30px);
+      transition: color 0.24s ease, transform 0.24s ease;
+    }
+
+    .step:hover::before,
+    .step.step-tilting::before {
+      color: rgba(199,155,53,0.34);
+      transform: translateZ(48px) scale(1.04);
+    }
+
+    .step > div {
+      transform: translateZ(24px);
+      transition: transform 0.24s ease;
+    }
+
+    .step:hover > div,
+    .step.step-tilting > div {
+      transform: translateZ(44px);
+    }
+
+    .step h3 {
+      transition: color 0.24s ease;
+    }
+
+    .step:hover h3,
+    .step.step-tilting h3 {
+      color: var(--gold);
     }
 
     .step p { margin: 8px 0 0; font-size: 15px; }
@@ -1042,10 +1105,10 @@
             <div class="visual-caption">Route stages</div>
           </div>
           <div class="steps reveal">
-            <div class="step"><div><h3>Choose Your Trek</h3><p>Match your altitude, pace, and season with a route designed for your group.</p></div></div>
-            <div class="step"><div><h3>Pre-Expedition Briefing</h3><p>Meet your guide team, check gear, permits, weather, and mountain protocols.</p></div></div>
-            <div class="step"><div><h3>Acclimatization Days</h3><p>Climb high, sleep low, and move with the rhythm the Himalaya asks for.</p></div></div>
-            <div class="step"><div><h3>Summit Push</h3><p>Step into thin air with calm logistics and guides watching every detail.</p></div></div>
+            <div class="step" tabindex="0"><div><h3>Choose Your Trek</h3><p>Match your altitude, pace, and season with a route designed for your group.</p></div></div>
+            <div class="step" tabindex="0"><div><h3>Pre-Expedition Briefing</h3><p>Meet your guide team, check gear, permits, weather, and mountain protocols.</p></div></div>
+            <div class="step" tabindex="0"><div><h3>Acclimatization Days</h3><p>Climb high, sleep low, and move with the rhythm the Himalaya asks for.</p></div></div>
+            <div class="step" tabindex="0"><div><h3>Summit Push</h3><p>Step into thin air with calm logistics and guides watching every detail.</p></div></div>
           </div>
         </div>
       </div>
@@ -1520,6 +1583,30 @@
         });
       }
 
+      function initStepTilt() {
+        if (mobile || reduced || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+        document.querySelectorAll('.step').forEach(function (step) {
+          function handleMove(event) {
+            const rect = step.getBoundingClientRect();
+            const x = (event.clientX - rect.left) / rect.width - 0.5;
+            const y = (event.clientY - rect.top) / rect.height - 0.5;
+            step.classList.add('step-tilting');
+            step.style.setProperty('--step-tilt-x', (-y * 5).toFixed(2) + 'deg');
+            step.style.setProperty('--step-tilt-y', (x * 7).toFixed(2) + 'deg');
+          }
+
+          function resetTilt() {
+            step.classList.remove('step-tilting');
+            step.style.setProperty('--step-tilt-x', '0deg');
+            step.style.setProperty('--step-tilt-y', '0deg');
+          }
+
+          step.addEventListener('mousemove', handleMove);
+          step.addEventListener('mouseleave', resetTilt);
+          step.addEventListener('blur', resetTilt);
+        });
+      }
+
       function loop(now) {
         if (now - lastRender < 33) {
           requestAnimationFrame(loop);
@@ -1561,6 +1648,7 @@
 
       initCarousel();
       initTrekTilt();
+      initStepTilt();
       try {
         if (!mobile && !reduced && window.THREE) {
           document.querySelectorAll('.section-canvas').forEach(function (canvas) {
