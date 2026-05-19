@@ -459,12 +459,15 @@
     .marquee {
       overflow: hidden;
       padding: 18px 0;
-      background: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(63,146,199,0.22), transparent 22% 78%, rgba(199,155,53,0.22)),
+        linear-gradient(135deg, #10192b, #172032 54%, #23334a);
       color: var(--gold);
       font-family: "Space Mono", monospace;
       font-size: 12px;
       text-transform: uppercase;
       white-space: nowrap;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.22);
     }
 
     .marquee-track {
@@ -829,12 +832,58 @@
     .step p { margin: 8px 0 0; font-size: 15px; }
 
     .gallery {
-      background: var(--ink);
+      background:
+        radial-gradient(circle at 18% 22%, rgba(63,146,199,0.34), transparent 28%),
+        radial-gradient(circle at 82% 18%, rgba(199,155,53,0.2), transparent 24%),
+        radial-gradient(circle at 54% 92%, rgba(45,90,61,0.3), transparent 30%),
+        linear-gradient(145deg, #0f1727 0%, #172032 46%, #213048 100%);
       color: var(--snow);
+      isolation: isolate;
+    }
+
+    .gallery::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.34;
+      background-image:
+        repeating-radial-gradient(ellipse at 28% 42%, transparent 0 26px, rgba(255,255,255,0.08) 27px 28px, transparent 29px 52px),
+        linear-gradient(115deg, transparent 0 52%, rgba(255,255,255,0.06) 52% 52.4%, transparent 52.4%);
+      mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 86%, transparent 100%);
+    }
+
+    .gallery::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 34%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.58;
+      background:
+        linear-gradient(168deg, transparent 0 14%, rgba(8,13,23,0.64) 14% 28%, transparent 28%),
+        linear-gradient(154deg, transparent 0 28%, rgba(11,18,31,0.82) 28% 46%, transparent 46%),
+        linear-gradient(142deg, transparent 0 44%, rgba(4,8,15,0.86) 44% 64%, transparent 64%);
     }
 
     .gallery h2 { color: var(--snow); }
     .gallery p { color: rgba(255,255,255,0.62); }
+
+    .gallery .eyebrow {
+      color: #f0c965;
+    }
+
+    .gallery .visual-wrap {
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.14), rgba(63,146,199,0.12)),
+        rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 34px 90px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+    }
 
     .terrain-carousel {
       margin-top: 54px;
@@ -1341,6 +1390,11 @@
     </section>
 
     <section class="section gallery" id="gallery">
+      <div class="float-field" aria-hidden="true">
+        <span class="float-shape cube" style="left:8%; top:14%; color:#7ab8e8; opacity:0.18; animation-delay:-2s;"></span>
+        <span class="float-shape ring" style="right:9%; top:20%; opacity:0.2; animation-delay:-6s;"></span>
+        <span class="float-shape line" style="left:12%; bottom:20%; opacity:0.18; animation-delay:-4s;"></span>
+      </div>
       <div class="inner">
         <div class="split">
           <div class="reveal">
