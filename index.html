@@ -608,10 +608,36 @@
     }
 
     .story-media {
+      --story-tilt-x: 0deg;
+      --story-tilt-y: 0deg;
       display: grid;
       grid-template-columns: 1fr 0.72fr;
       gap: 18px;
       align-items: end;
+      position: relative;
+      perspective: 1100px;
+      transform: perspective(1000px) rotateX(var(--story-tilt-x)) rotateY(var(--story-tilt-y));
+      transform-style: preserve-3d;
+      transition: transform 0.22s ease;
+      will-change: transform;
+    }
+
+    .story-media::after {
+      content: "";
+      position: absolute;
+      inset: -18px;
+      z-index: 3;
+      pointer-events: none;
+      border-radius: 12px;
+      background: radial-gradient(circle at var(--story-glow-x, 50%) var(--story-glow-y, 40%), rgba(255,255,255,0.46), transparent 34%);
+      opacity: 0;
+      mix-blend-mode: screen;
+      transition: opacity 0.24s ease;
+    }
+
+    .story-media:hover::after,
+    .story-media.story-tilting::after {
+      opacity: 1;
     }
 
     .story-media img {
@@ -619,10 +645,33 @@
       object-fit: cover;
       border-radius: 8px;
       box-shadow: var(--shadow);
+      transition: transform 0.34s ease, box-shadow 0.34s ease, filter 0.34s ease;
+      will-change: transform;
     }
 
-    .story-media img:first-child { height: 560px; }
-    .story-media img:last-child { height: 360px; }
+    .story-media img:first-child {
+      height: 560px;
+      transform: translateZ(28px) rotateY(-2deg);
+    }
+
+    .story-media img:last-child {
+      height: 360px;
+      transform: translateZ(64px) rotateY(4deg) translateY(-18px);
+    }
+
+    .story-media:hover img:first-child,
+    .story-media.story-tilting img:first-child {
+      transform: translateZ(54px) rotateY(-5deg) translateY(-8px);
+      box-shadow: 0 36px 88px rgba(23,32,50,0.18);
+      filter: saturate(1.04);
+    }
+
+    .story-media:hover img:last-child,
+    .story-media.story-tilting img:last-child {
+      transform: translateZ(108px) rotateY(8deg) translateY(-30px) translateX(10px);
+      box-shadow: 0 28px 70px rgba(23,32,50,0.22);
+      filter: saturate(1.08);
+    }
 
     .stats {
       display: grid;
@@ -1223,7 +1272,7 @@
         <span class="float-shape pyramid" style="left:5%; bottom:14%; animation-delay:-5s;"></span>
       </div>
       <div class="inner split">
-        <div class="story-media reveal">
+        <div class="story-media reveal" tabindex="0" aria-label="Interactive guide and trekking photo stack">
           <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?w=900" alt="Trekkers crossing a suspension bridge on a Himalayan route">
           <img src="https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81?w=600" alt="Guide looking toward distant Himalayan peaks">
         </div>
@@ -1788,6 +1837,35 @@
         });
       }
 
+      function initStoryImageTilt() {
+        if (mobile || reduced || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+        const stack = document.querySelector('.story-media');
+        if (!stack) return;
+
+        function handleMove(event) {
+          const rect = stack.getBoundingClientRect();
+          const x = (event.clientX - rect.left) / rect.width - 0.5;
+          const y = (event.clientY - rect.top) / rect.height - 0.5;
+          stack.classList.add('story-tilting');
+          stack.style.setProperty('--story-tilt-x', (-y * 7).toFixed(2) + 'deg');
+          stack.style.setProperty('--story-tilt-y', (x * 9).toFixed(2) + 'deg');
+          stack.style.setProperty('--story-glow-x', ((x + 0.5) * 100).toFixed(1) + '%');
+          stack.style.setProperty('--story-glow-y', ((y + 0.5) * 100).toFixed(1) + '%');
+        }
+
+        function resetTilt() {
+          stack.classList.remove('story-tilting');
+          stack.style.setProperty('--story-tilt-x', '0deg');
+          stack.style.setProperty('--story-tilt-y', '0deg');
+          stack.style.setProperty('--story-glow-x', '50%');
+          stack.style.setProperty('--story-glow-y', '40%');
+        }
+
+        stack.addEventListener('mousemove', handleMove);
+        stack.addEventListener('mouseleave', resetTilt);
+        stack.addEventListener('blur', resetTilt);
+      }
+
       function loop(now) {
         if (now - lastRender < 33) {
           requestAnimationFrame(loop);
@@ -1830,6 +1908,7 @@
       initCarousel();
       initTrekTilt();
       initStepTilt();
+      initStoryImageTilt();
       try {
         if (!mobile && !reduced && window.THREE) {
           document.querySelectorAll('.section-canvas').forEach(function (canvas) {
