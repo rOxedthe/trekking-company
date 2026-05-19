@@ -525,41 +525,108 @@
     .gallery h2 { color: var(--snow); }
     .gallery p { color: rgba(255,255,255,0.62); }
 
-    .gallery-strip {
-      display: flex;
-      gap: 18px;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-      margin-top: 44px;
-      padding-bottom: 8px;
+    .terrain-carousel {
+      margin-top: 54px;
     }
 
-    .gallery-strip::-webkit-scrollbar { display: none; }
-
-    .gallery-item {
+    .carousel-stage {
       position: relative;
-      flex: 0 0 340px;
-      height: 250px;
-      border-radius: 8px;
+      height: clamp(330px, 48vw, 540px);
+      perspective: 1200px;
       overflow: hidden;
-      scroll-snap-align: start;
     }
 
-    .gallery-item img {
+    .carousel-track {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+    }
+
+    .carousel-item {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(58vw, 620px);
+      height: clamp(250px, 34vw, 410px);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 34px 90px rgba(0,0,0,0.34);
+      transform: translate(-50%, -50%) translateX(var(--x)) translateZ(var(--z)) rotateY(var(--r)) scale(var(--s));
+      opacity: var(--o);
+      z-index: var(--zi);
+      transition: transform 0.82s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease, filter 0.55s ease;
+      filter: saturate(var(--sat)) brightness(var(--b));
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    .carousel-item.active {
+      pointer-events: auto;
+    }
+
+    .carousel-item img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    .gallery-item span {
+    .carousel-item span {
       position: absolute;
-      left: 16px;
-      bottom: 14px;
+      left: 22px;
+      bottom: 18px;
       color: var(--gold);
       font-family: "Space Mono", monospace;
       font-size: 11px;
       text-transform: uppercase;
+      padding: 7px 10px;
+      background: rgba(23,32,50,0.72);
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+    }
+
+    .carousel-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .carousel-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.08);
+      color: var(--snow);
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .carousel-btn:hover {
+      transform: translateY(-2px);
+      border-color: var(--gold);
+      background: rgba(199,155,53,0.18);
+    }
+
+    .carousel-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .carousel-dot {
+      width: 7px;
+      height: 7px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.34);
+      padding: 0;
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+
+    .carousel-dot.active {
+      background: var(--gold);
+      transform: scale(1.45);
     }
 
     .testimonials {
@@ -745,7 +812,11 @@
       .trek-intro { display: block; }
       .stats, .number-list, .footer-row { grid-template-columns: 1fr; }
       .step { grid-template-columns: 70px 1fr; }
-      .gallery-item { flex-basis: 280px; }
+      .carousel-stage { height: 360px; }
+      .carousel-item {
+        width: 78vw;
+        height: 260px;
+      }
       .footer-row, .footer-links, .footer-note { text-align: center; justify-content: center; }
       form { padding: 24px; }
     }
@@ -948,12 +1019,21 @@
             <div class="visual-caption">Field image prism</div>
           </div>
         </div>
-        <div class="gallery-strip reveal">
-          <figure class="gallery-item"><img src="https://images.unsplash.com/photo-1585938389612-a552a28d6914?w=700" alt="Prayer flags above a Himalayan valley"><span>Namche Bazaar</span></figure>
-          <figure class="gallery-item"><img src="https://images.unsplash.com/photo-1565118531796-763e5082d113?w=700" alt="Snow path through Himalayan peaks"><span>Khumbu Trail</span></figure>
-          <figure class="gallery-item"><img src="https://images.unsplash.com/photo-1531761535209-180857e963b9?w=700" alt="High mountain lake below blue sky"><span>Gokyo Lakes</span></figure>
-          <figure class="gallery-item"><img src="https://images.unsplash.com/photo-1478827387698-1527781a4887?w=700" alt="Tents beneath mountain light"><span>Base Camp</span></figure>
-          <figure class="gallery-item"><img src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=700" alt="Forest and mountain trail"><span>Langtang Forest</span></figure>
+        <div class="terrain-carousel reveal" aria-label="3D terrain image carousel">
+          <div class="carousel-stage">
+            <div class="carousel-track" id="terrain-carousel">
+              <figure class="carousel-item active"><img src="https://images.unsplash.com/photo-1585938389612-a552a28d6914?w=1000" alt="Prayer flags above a Himalayan valley"><span>Namche Bazaar</span></figure>
+              <figure class="carousel-item"><img src="https://images.unsplash.com/photo-1565118531796-763e5082d113?w=1000" alt="Snow path through Himalayan peaks"><span>Khumbu Trail</span></figure>
+              <figure class="carousel-item"><img src="https://images.unsplash.com/photo-1531761535209-180857e963b9?w=1000" alt="High mountain lake below blue sky"><span>Gokyo Lakes</span></figure>
+              <figure class="carousel-item"><img src="https://images.unsplash.com/photo-1478827387698-1527781a4887?w=1000" alt="Tents beneath mountain light"><span>Base Camp</span></figure>
+              <figure class="carousel-item"><img src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1000" alt="Forest and mountain trail"><span>Langtang Forest</span></figure>
+            </div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn" type="button" data-carousel="prev" aria-label="Previous gallery image">‹</button>
+            <div class="carousel-dots" aria-label="Gallery image selector"></div>
+            <button class="carousel-btn" type="button" data-carousel="next" aria-label="Next gallery image">›</button>
+          </div>
         </div>
       </div>
     </section>
@@ -1035,8 +1115,12 @@
       const animated = [];
       let quoteIndex = 0;
       let lastQuote = performance.now();
+      let carouselIndex = 0;
+      let lastCarousel = performance.now();
       let lastRender = 0;
       const quotes = Array.from(document.querySelectorAll('.quote'));
+      const carouselItems = Array.from(document.querySelectorAll('.carousel-item'));
+      const carouselDotsWrap = document.querySelector('.carousel-dots');
 
       function finishLoader() {
         window.setTimeout(function () { loader.classList.add('done'); }, 300);
@@ -1277,6 +1361,91 @@
         });
       }
 
+      function wrappedOffset(index, active, length) {
+        let offset = index - active;
+        if (offset > length / 2) offset -= length;
+        if (offset < -length / 2) offset += length;
+        return offset;
+      }
+
+      function renderCarousel() {
+        if (!carouselItems.length) return;
+        const near = Math.min(window.innerWidth * 0.28, 340);
+        const far = Math.min(window.innerWidth * 0.46, 560);
+        carouselItems.forEach(function (item, index) {
+          const offset = wrappedOffset(index, carouselIndex, carouselItems.length);
+          const abs = Math.abs(offset);
+          let x = 0, z = 180, r = 0, s = 1, o = 1, sat = 1, b = 1, zi = 10;
+          if (abs === 1) {
+            x = offset * near;
+            z = -55;
+            r = offset * -28;
+            s = 0.82;
+            o = 0.78;
+            sat = 0.82;
+            b = 0.78;
+            zi = 6;
+          } else if (abs === 2) {
+            x = offset * far / 2;
+            z = -280;
+            r = offset * -42;
+            s = 0.62;
+            o = 0.32;
+            sat = 0.58;
+            b = 0.58;
+            zi = 2;
+          } else if (abs > 2) {
+            x = offset > 0 ? far : -far;
+            z = -420;
+            r = offset > 0 ? -50 : 50;
+            s = 0.5;
+            o = 0;
+            sat = 0.45;
+            b = 0.45;
+            zi = 1;
+          }
+          item.classList.toggle('active', offset === 0);
+          item.style.setProperty('--x', x + 'px');
+          item.style.setProperty('--z', z + 'px');
+          item.style.setProperty('--r', r + 'deg');
+          item.style.setProperty('--s', s);
+          item.style.setProperty('--o', o);
+          item.style.setProperty('--sat', sat);
+          item.style.setProperty('--b', b);
+          item.style.setProperty('--zi', zi);
+        });
+        document.querySelectorAll('.carousel-dot').forEach(function (dot, index) {
+          dot.classList.toggle('active', index === carouselIndex);
+        });
+      }
+
+      function moveCarousel(direction) {
+        if (!carouselItems.length) return;
+        carouselIndex = (carouselIndex + direction + carouselItems.length) % carouselItems.length;
+        lastCarousel = performance.now();
+        renderCarousel();
+      }
+
+      function initCarousel() {
+        if (!carouselItems.length || !carouselDotsWrap) return;
+        carouselItems.forEach(function (_, index) {
+          const dot = document.createElement('button');
+          dot.type = 'button';
+          dot.className = 'carousel-dot';
+          dot.setAttribute('aria-label', 'Show gallery image ' + (index + 1));
+          dot.addEventListener('click', function () {
+            carouselIndex = index;
+            lastCarousel = performance.now();
+            renderCarousel();
+          });
+          carouselDotsWrap.appendChild(dot);
+        });
+        document.querySelector('[data-carousel="prev"]').addEventListener('click', function () { moveCarousel(-1); });
+        document.querySelector('[data-carousel="next"]').addEventListener('click', function () { moveCarousel(1); });
+        window.addEventListener('resize', renderCarousel);
+        renderCarousel();
+      }
+
       function loop(now) {
         if (now - lastRender < 33) {
           requestAnimationFrame(loop);
@@ -1295,6 +1464,10 @@
           quotes[quoteIndex].classList.add('active');
           lastQuote = now;
         }
+        if (carouselItems.length && now - lastCarousel > 4600) {
+          moveCarousel(1);
+          lastCarousel = now;
+        }
         if (!reduced) requestAnimationFrame(loop);
       }
 
@@ -1312,6 +1485,7 @@
         });
       });
 
+      initCarousel();
       try {
         if (!mobile && !reduced && window.THREE) {
           document.querySelectorAll('.section-canvas').forEach(function (canvas) {
